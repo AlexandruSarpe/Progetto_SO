@@ -8,4 +8,5 @@
 
 void internal_semPost(){
   // do stuff :)
+  int semnum=running->syscall_args[0];
 }

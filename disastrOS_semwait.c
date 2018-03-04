@@ -8,4 +8,5 @@
 
 void internal_semWait(){
   // do stuff :)
+  int semnum=running->syscall_args[0];
 }

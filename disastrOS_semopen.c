@@ -6,6 +6,9 @@
 #include "disastrOS_semaphore.h"
 #include "disastrOS_semdescriptor.h"
 
+
+
 void internal_semOpen(){
   // do stuff :)
+  int semnum=running->syscall_args[0];
 }
