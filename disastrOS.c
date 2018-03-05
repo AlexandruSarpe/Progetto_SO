@@ -326,6 +326,7 @@ int Search_id(ListHead* descriptor_list, int id){
   while(aux){
     SemDescriptor* descriptor = (SemDescriptor*)aux;
     if(id == descriptor->semaphore->id) return 1
+    aux = aux->next;
   }
   return 0;
 }
