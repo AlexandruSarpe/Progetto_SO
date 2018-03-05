@@ -184,13 +184,13 @@ void disastrOS_start(void (*f)(void*), void* f_args, char* logfile){
 
   // fill these with the syscall handlers
   syscall_vector[DSOS_CALL_SEMOPEN]      = internal_semOpen;
-  syscall_numarg[DSOS_CALL_SEMOPEN]      = 1;
+  syscall_numarg[DSOS_CALL_SEMOPEN]      = 2;
 
   syscall_vector[DSOS_CALL_SEMCLOSE]      = internal_semClose;
   syscall_numarg[DSOS_CALL_SEMCLOSE]      = 1;
 
   syscall_vector[DSOS_CALL_SEMPOST]      = internal_semPost;
-  syscall_numarg[DSOS_CALL_SEMPOST]      = 2;
+  syscall_numarg[DSOS_CALL_SEMPOST]      = 1;
 
   syscall_vector[DSOS_CALL_SEMWAIT]      = internal_semWait;
   syscall_numarg[DSOS_CALL_SEMWAIT]      = 1;
@@ -287,17 +287,17 @@ void disastrOS_sleep(int sleep_time) {
   disastrOS_syscall(DSOS_CALL_SLEEP, sleep_time);
 }
 //implemento le funzini tramite syscall
-int DisastrOS_semOpen(int semnum){
-  disastrOS_syscall(DSOS_CALL_SEMOPEN, semnum);
+int DisastrOS_semOpen(int semnum, int value){
+  return disastrOS_syscall(DSOS_CALL_SEMOPEN, semnum, value);
 }
 int DisastrOS_semClose(int semnum){
-  disastrOS_syscall(DSOS_CALL_SEMCLOSE, semnum);
+  return disastrOS_syscall(DSOS_CALL_SEMCLOSE, semnum);
 }
 int DisastrOS_semWait(int semnum){
-  disastrOS_syscall(DSOS_CALL_SEMWAIT, semnum);
+  return disastrOS_syscall(DSOS_CALL_SEMWAIT, semnum);
 }
 int DisastrOS_semPost(int semnum){
-  disastrOS_syscall(DSOS_CALL_SEMPOST, semnum);
+  return disastrOS_syscall(DSOS_CALL_SEMPOST, semnum);
 }
 
 
@@ -317,6 +317,17 @@ int disastrOS_closeResource(int fd) {
 
 int disastrOS_destroyResource(int resource_id) {
   return disastrOS_syscall(DSOS_CALL_DESTROY_RESOURCE, resource_id);
+}
+
+
+//search in the semdescriptor list by id of the semaphore
+int Search_id(ListHead* descriptor_list, int id){
+  ListItem* aux = descriptor_list->first;
+  while(aux){
+    SemDescriptor* descriptor = (SemDescriptor*)aux;
+    if(id == descriptor->semaphore->id) return 1
+  }
+  return 0;
 }
 
 
