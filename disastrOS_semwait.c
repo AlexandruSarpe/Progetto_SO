@@ -16,9 +16,11 @@ void internal_semWait(){
   //we have to check if the semaphore is opened in the process
   Semaphore* sem = Search_id(&process_semaphores, semnum);
 
-  if(!sem) return DSOS_ESEMNOTOPENED;
+  if(!sem){
+    running->syscall_retvalue = DSOS_ESEMNOTOPENED;
+  }
 
-  if(sem->count<=0){
+  else if(sem->count<=0){
     //the process has to wait in the waiting queue
     List_insert(&sem->waiting_descriptors, sem->waiting_descriptors.last, (ListItem*)&running);
     //we have to change the state of the process_semaphores

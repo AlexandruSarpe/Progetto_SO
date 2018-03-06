@@ -8,5 +8,5 @@
 
 void internal_semClose(){
   // do stuff :)
-  int semnum=running->syscall_args[0];
+  //int semnum=running->syscall_args[0];
 }
