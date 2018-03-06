@@ -23,14 +23,15 @@ void internal_semOpen(){
 
   if(!sem){
     //if it doesn't exist in the system we have to create it
-    Semaphore_init();
     sem = semaphore_alloc(semnum, value);
     //now we have to add th esemaphore to the semaphore list of the system
     List_insert(&semaphores_list, semaphore_list.last, (ListItem*) sem);
     int fd = running->last_sem_fd + 1;
     //we have to create the semdescriptor
-    SemDescriptor_init();
     SemDescriptor sem_desc = SemDescriptor_alloc(fd, sem, &running);
+
+    //we have to insert the process in the list
+    List_insert(&sem.descriptors, sem.descriptors.last, (ListItem*)&running);
 
     running->syscall_retvalue = semnum;
 

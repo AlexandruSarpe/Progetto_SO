@@ -18,12 +18,19 @@ void internal_semWait(){
 
   if(!sem) return DSOS_ESEMNOTOPENED;
 
-  if(sem->counter<=0){
+  if(sem->count<=0){
     //the process has to wait in the waiting queue
     List_insert(&sem->waiting_descriptors, sem->waiting_descriptors.last, (ListItem*)&running);
+    //we have to change the state of the process_semaphores
+    running->status = Waiting;
+    //and we insert the process in the waiting list
+    List_insert(&waiting_list, waiting_list.last, (ListItem*)&running);
+    running->syscall_retvalue = 0;
   }
   else{
-    
+    sem->count --;
+    running->syscall_retvalue = 0;
   }
+
 
 }
