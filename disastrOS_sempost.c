@@ -8,5 +8,16 @@
 
 void internal_semPost(){
   // do stuff :)
-  int semnum=running->syscall_args[0];
+  // Prendo argomento numero del semaforo
+  int semNumber=running->syscall_args[0];
+
+  // Prendo la lista dei semafori attivi per quel processo
+  ListHead sems=running->sem_descriptors;
+
+  // Controllo se il semaforo esiste ed è nella lista
+  Semaphore* semaphore=Search_id(&sems, semNumber);
+
+  // se non c'è;
+  if (!sem) running->syscall_retvalue=DSOS_ESEMNOTOPENED;
+
 }
