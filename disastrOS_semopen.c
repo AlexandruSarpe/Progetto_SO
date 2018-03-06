@@ -23,15 +23,18 @@ void internal_semOpen(){
 
   if(!sem){
     //if it doesn't exist in the system we have to create it
-    sem = semaphore_alloc(semnum, value);
+    sem = Semaphore_alloc(semnum, value);
     //now we have to add th esemaphore to the semaphore list of the system
-    List_insert(&semaphores_list, semaphore_list.last, (ListItem*) sem);
+    List_insert(&semaphores_list, semaphores_list.last, (ListItem*) sem);
     int fd = running->last_sem_fd + 1;
     //we have to create the semdescriptor
-    SemDescriptor sem_desc = SemDescriptor_alloc(fd, sem, &running);
+    SemDescriptor* sem_desc = SemDescriptor_alloc(fd, sem, running);
+
+    //we have to add the descriptor to the list in the PCB
+    List_insert(&running->sem_descriptors, running->sem_descriptors.last, (ListItem*)sem_desc);
 
     //we have to insert the process in the list
-    List_insert(&sem.descriptors, sem.descriptors.last, (ListItem*)&running);
+    List_insert(&sem->descriptors, sem->descriptors.last, (ListItem*)running);
 
     running->syscall_retvalue = semnum;
 
@@ -48,7 +51,10 @@ void internal_semOpen(){
       int fd = running->last_sem_fd + 1;
       //we have to create the semdescriptor
       SemDescriptor_init();
-      SemDescriptor sem_desc = SemDescriptor_alloc(fd, sem, &running);
+      SemDescriptor* sem_desc = SemDescriptor_alloc(fd, sem, running);
+      //we have to add the descriptor to the list in the PCB
+      List_insert(&running->sem_descriptors, running->sem_descriptors.last, (ListItem*)sem_desc);
+
       running->syscall_retvalue = semnum;
     }
 

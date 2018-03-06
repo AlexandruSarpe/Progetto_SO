@@ -38,7 +38,3 @@ int disastrOS_destroyResource(int resource_id);
 
 // debug function, prints the state of the internal system
 void disastrOS_printStatus();
-
-
-//we need to search the id in the list of the semdescriptors
-Semaphore* Search_id(ListHead* descriptor_list, int id);

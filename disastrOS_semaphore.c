@@ -4,6 +4,7 @@
 #include "disastrOS_descriptor.h"
 #include "pool_allocator.h"
 #include "linked_list.h"
+#include "disastrOS_semdescriptor.h"
 
 #define SEMAPHORE_SIZE sizeof(Semaphore)
 #define SEMAPHORE_MEMSIZE (sizeof(Semaphore)+sizeof(int))
@@ -48,6 +49,18 @@ Semaphore* SemaphoreList_byId(SemaphoreList* l, int id) {
   }
   return 0;
 }
+//search in the semdescriptor list by id of the semaphore
+Semaphore* Search_id(ListHead* descriptor_list, int id){
+  ListItem* aux = descriptor_list->first;
+  Semaphore* sem = 0;
+  while(aux){
+    SemDescriptor* descriptor = (SemDescriptor*)aux;
+    if(id == descriptor->semaphore->id) sem = descriptor->semaphore;
+    aux = aux->next;
+  }
+  return sem;
+}
+
 
 void Semaphore_print(Semaphore* r) {
   printf("id: %d, count:%d, pids:", r->id, r->count);
