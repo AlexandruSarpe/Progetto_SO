@@ -39,7 +39,7 @@ void internal_semOpen(){
     //if it exist in the system
     //we have to check that the semaphore isn't already open in the process
     ListHead semaphores_opened = running->sem_descriptors;
-    int opened = Search_id(&semaphores_opened, semnum);
+    Semaphore* opened = Search_id(&semaphores_opened, semnum);
     if(opened){
       running->syscall_retvalue = semnum;
     }

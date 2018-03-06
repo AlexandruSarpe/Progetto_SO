@@ -321,14 +321,15 @@ int disastrOS_destroyResource(int resource_id) {
 
 
 //search in the semdescriptor list by id of the semaphore
-int Search_id(ListHead* descriptor_list, int id){
+Semaphore* Search_id(ListHead* descriptor_list, int id){
   ListItem* aux = descriptor_list->first;
+  Semaphore* sem = 0;
   while(aux){
     SemDescriptor* descriptor = (SemDescriptor*)aux;
-    if(id == descriptor->semaphore->id) return 1
+    if(id == descriptor->semaphore->id) sem = descriptor->semaphore;
     aux = aux->next;
   }
-  return 0;
+  return sem;
 }
 
 

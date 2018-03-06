@@ -29,6 +29,9 @@
 #define DSOS_ERESOURCECLOSE -12
 #define DSOS_ERESOURCEINUSE -13
 
+//semaphore errors
+#define DSOS_ESEMNOTOPENED -14
+
 // syscall numbers
 #define DSOS_MAX_SYSCALLS 32
 #define DSOS_MAX_SYSCALLS_ARGS 8

@@ -41,4 +41,4 @@ void disastrOS_printStatus();
 
 
 //we need to search the id in the list of the semdescriptors
-int Search_id(ListHead* descriptor_list, int id);
+Semaphore* Search_id(ListHead* descriptor_list, int id);
