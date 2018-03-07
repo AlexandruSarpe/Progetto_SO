@@ -15,10 +15,13 @@ void internal_semPost(){
     ListHead sems=running->sem_descriptors;
 
     // Controllo se il semaforo esiste ed è nella lista
-    SemDescriptor* sem_d=Search_id(&sems, semNumber);
+    SemDescriptor* sem_d=SemDescriptorList_byFd(&sems,//TODO);
 
     // se non c'è;
-    if (!sem_d) running->syscall_retvalue=DSOS_ESEMNOTOPENED;
+    if (!sem_d) {
+        running->syscall_retvalue=DSOS_ERESOURCENOFD;
+        return;
+    }
 
     // prendo il valore attuale del semaforo e lo aumento di 1
     int count=(sem_d->semaphore->count)++;
@@ -39,5 +42,5 @@ void internal_semPost(){
         //TODO
     }
 
-    return 0;
+    running->syscall_retvalue = 0;;
 }
