@@ -32,20 +32,20 @@ void internal_semPost(){
     }
 
     if (s->count<0) {
-        // rimuovo il primo processo in coda alla waiting queue del semaforo
-        ListItem* toReady_proc=List_detach(&(s->waiting_descriptors),(ListItem*)s->waiting_descriptors.first);
+        // rimuovo il primo processo in cima alla waiting queue del semaforo
+        SemDescriptorPtr* toReady_proc=(SemDescriptorPtr*)List_detach(&(s->waiting_descriptors),(ListItem*)s->waiting_descriptors.first);
 
         // prendo il PCB di quel processo
-        PCB* toReady_proc_pcb=(SemDescriptorPtr*)toReady_proc->descriptor->pcb;
+        PCB* toReady_proc_pcb=toReady_proc->descriptor->pcb;
 
         // rimuovo il processo dalla waiting list del sistema
-        List_detach(waiting_list,(ListItem*)toReady_proc_pcb);
+        List_detach(&waiting_list,(ListItem*)toReady_proc_pcb);
 
         // metto lo status del processo rimosso dalla waiting list a Ready
         toReady_proc_pcb->status=Ready;
 
         // inserisco il processo nella ready list del sistema
-        List_insert(&ready_list,ready_list.last,(SemDescriptorPtr*)toReady_proc);
+        List_insert(&ready_list,ready_list.last,(ListItem*)toReady_proc);
     }
 
     // aumento valore del semaforo
