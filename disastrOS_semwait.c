@@ -30,6 +30,7 @@ void internal_semWait(){
     //if there is a process in wating list of the semaphore we have to awake him, else we have to set speeper as run prcess
     if (ready_list.first)
       running=(PCB*) List_detach(&ready_list, ready_list.first);
+      running->syscall_retvalue = 0;
     else {
       running=0;
       printf ("they are all sleeping\n");
