@@ -32,9 +32,6 @@ void internal_semPost(){
     }
 
     if (s->count<0) {
-        // prendo il valore attuale del semaforo e lo aumento di 1
-        (s->count)++;
-
         // rimuovo il primo processo in coda alla waiting queue del semaforo
         ListItem* toReady_proc=List_detach(&(s->waiting_descriptors),(ListItem*)s->waiting_descriptors.first);
 
@@ -50,10 +47,11 @@ void internal_semPost(){
         // inserisco il processo nella ready list del sistema
         List_insert(&ready_list,ready_list.last,(SemDescriptorPtr*)toReady_proc);
     }
+
     // aumento valore del semaforo
     (s->count)++;
 
     //setto il valore di ritorno a 0 per indicare successo
     running->syscall_retvalue = 0;
-    
+
 }
