@@ -31,6 +31,9 @@
 
 //semaphore errors
 #define DSOS_ESEMNOTOPENED -14
+#define DSOS_ESEMNOTOWNED -15
+#define DSOS_ESEMFREE -16
+#define DSOS_ESEMDESCFREE -17
 
 // syscall numbers
 #define DSOS_MAX_SYSCALLS 32
