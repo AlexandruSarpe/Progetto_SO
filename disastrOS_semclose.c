@@ -8,5 +8,38 @@
 
 void internal_semClose(){
   // do stuff :)
-  //int semnum=running->syscall_args[0];
+  int sem_fd=running->syscall_args[0];
+
+  int ret;
+
+  // prendo il SemDescriptor
+  SemDescriptor* sem_d=SemDescriptorList_byFd(&(running->sem_descriptors),sem_fd);
+
+  if (!sem_d) {
+      running->syscall_retvalue=DSOS_ESEMNOTOWNED;
+      return;
+  }
+
+  // prendo il semaforo all'interno
+  Semaphore* s=sem_d->semaphore;
+
+  // tolgo me stesso dai descriptors del semaforo
+  List_detach(&(s->descriptors),(ListItem*)running);
+
+  if (!(s->descriptors).size) {
+     ret=Semaphore_free(s);
+     if (ret!=0x0) {
+         printf("Errore Semaphore_free: %s\n",PoolAllocator_strerror((PoolAllocatorResult) ret));
+         running->syscall_retvalue=DSOS_ESEMFREE;
+         return;
+     }
+   }
+   int ret=SemDescriptor_free(sem_d);
+   if (ret!=0x0) {
+       printf("Errore Semaphore_free: %s\n",PoolAllocator_strerror((PoolAllocatorResult) ret));
+       running->syscall_retvalue=DSOS_ESEMDESCFREE;
+       return;
+   }
+   running->syscall_retvalue=ret;
+   return;
 }
