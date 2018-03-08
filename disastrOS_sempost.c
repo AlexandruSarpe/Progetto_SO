@@ -19,7 +19,7 @@ void internal_semPost(){
 
     // se non c'è;
     if (!sem_d) {
-        running->syscall_retvalue=DSOS_ERESOURCENOFD;
+        running->syscall_retvalue=DSOS_ESEMNOTOWNED;
         return;
     }
 
