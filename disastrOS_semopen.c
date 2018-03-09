@@ -59,6 +59,13 @@ void internal_semOpen(){
     }
     sem_desc->ptr = sem_desc_ptr;
 
+    SemDescriptorPtr * sem_desc_ptr_waiter = SemDescriptorPtr_alloc(sem_desc);
+    if(!sem_desc_ptr_waiter) {
+      running->syscall_retvalue = DSOS_ECREATESEMDESCPTR; //the semDESCRIPTORpointer couldn't be create
+      return;
+    }
+    sem_desc->ptr_waiter = sem_desc_ptr_waiter;
+
     //we add teh descriptor pointer to the list
     List_insert(&running-> sem_descriptors,running->sem_descriptors.last,(ListItem*) sem_desc);
     List_insert(&running-> descriptors,running->descriptors.last,(ListItem*) sem_desc_ptr);

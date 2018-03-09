@@ -37,6 +37,7 @@ void internal_semClose(){
      }
    }
    SemDescriptorPtr* sem_d_ptr = sem_d->ptr;
+   SemDescriptorPtr* sem_d_ptr_waiter = sem_d->ptr_waiter;
    ret=SemDescriptor_free(sem_d);
    if (ret!=0x0) {
     // printf("Errore Semaphore_free: %s\n",PoolAllocator_strerror((PoolAllocatorResult) ret));
@@ -45,6 +46,12 @@ void internal_semClose(){
    }
    //we have to free also the semdescriptor pointer
    ret=SemDescriptorPtr_free(sem_d_ptr);
+   if (ret!=0x0) {
+    // printf("Errore Semaphore_free: %s\n",PoolAllocator_strerror((PoolAllocatorResult) ret));
+    running->syscall_retvalue= DSOS_ESEMDESCPTRFREE;
+    return;
+   }
+   ret=SemDescriptorPtr_free(sem_d_ptr_waiter);
    if (ret!=0x0) {
     // printf("Errore Semaphore_free: %s\n",PoolAllocator_strerror((PoolAllocatorResult) ret));
     running->syscall_retvalue= DSOS_ESEMDESCPTRFREE;

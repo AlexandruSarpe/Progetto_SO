@@ -24,14 +24,8 @@ void internal_semWait(){
 
   else if(sem->count<=0){
     //the process has to wait in the waiting queue
-    SemDescriptorPtr * sem_desc_ptr = SemDescriptorPtr_alloc(sem_desc);
-    if(!sem_desc_ptr) {
-      running->syscall_retvalue = DSOS_ECREATESEMDESCPTR; //the semDESCRIPTORpointer couldn't be create
-      return;
-    }
-    sem_desc->ptr_waiter = sem_desc_ptr;
 
-    List_insert(&sem->waiting_descriptors, sem->waiting_descriptors.last, (ListItem*)sem_desc_ptr);
+    List_insert(&sem->waiting_descriptors, sem->waiting_descriptors.last, (ListItem*)sd->ptr_waiter);
     //we have to change the state of the process_semaphores
     running->status = Waiting;
     //and we insert the process in the waiting list
