@@ -5,6 +5,7 @@
 #include "disastrOS_syscalls.h"
 #include "disastrOS_semaphore.h"
 #include "disastrOS_semdescriptor.h"
+#include "pool_allocator.h"
 
 void internal_semClose(){
   // do stuff :)
@@ -27,18 +28,27 @@ void internal_semClose(){
   List_detach(&(s->descriptors),(ListItem*)running);
 
   if (!(s->descriptors).size) {
+     s = (Semaphore*) List_detach(&semaphores_list, (ListItem*) s);
      ret=Semaphore_free(s);
      if (ret!=0x0) {
-         printf("Errore Semaphore_free: %s\n",PoolAllocator_strerror((PoolAllocatorResult) ret));
+        // printf("Errore Semaphore_free: %s\n",PoolAllocator_strerror((PoolAllocatorResult) ret));
          running->syscall_retvalue=DSOS_ESEMFREE;
          return;
      }
    }
-   int ret=SemDescriptor_free(sem_d);
+   SemDescriptorPtr* sem_d_ptr = sem_d->ptr;
+   ret=SemDescriptor_free(sem_d);
    if (ret!=0x0) {
-       printf("Errore Semaphore_free: %s\n",PoolAllocator_strerror((PoolAllocatorResult) ret));
-       running->syscall_retvalue=DSOS_ESEMDESCFREE;
-       return;
+    // printf("Errore Semaphore_free: %s\n",PoolAllocator_strerror((PoolAllocatorResult) ret));
+    running->syscall_retvalue= DSOS_ESEMDESCFREE;
+    return;
+   }
+   //we have to free also the semdescriptor pointer
+   ret=SemDescriptorPtr_free(sem_d_ptr);
+   if (ret!=0x0) {
+    // printf("Errore Semaphore_free: %s\n",PoolAllocator_strerror((PoolAllocatorResult) ret));
+    running->syscall_retvalue= DSOS_ESEMDESCPTRFREE;
+    return;
    }
    running->syscall_retvalue=ret;
    return;

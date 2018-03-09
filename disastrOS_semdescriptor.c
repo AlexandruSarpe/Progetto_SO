@@ -105,3 +105,15 @@ void SemDescriptorPtrList_print(ListHead* l){
   }
   printf("]");
 }
+
+//search in the semdescriptor list by id of the semaphore
+SemDescriptor* Search_id(ListHead* descriptor_list, int id){
+  ListItem* aux = descriptor_list->first;
+  SemDescriptor* sem = 0;
+  while(aux){
+    SemDescriptor* descriptor = (SemDescriptor*)aux;
+    if(id == descriptor->semaphore->id) sem = descriptor;
+    aux = aux->next;
+  }
+  return sem;
+}

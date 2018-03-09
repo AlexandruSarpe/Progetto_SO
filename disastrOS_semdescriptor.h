@@ -12,6 +12,7 @@ typedef struct SemDescriptor{
   Semaphore* semaphore;
   int fd;
   struct SemDescriptorPtr* ptr; // pointer to the entry in the resource list
+  struct SemDescriptorPtr* ptr_waiter; // pointer to the entry in the waiting list
 } SemDescriptor;
 
 typedef struct SemDescriptorPtr{
@@ -29,3 +30,6 @@ void SemDescriptorList_print(ListHead* l);
 SemDescriptorPtr* SemDescriptorPtr_alloc(SemDescriptor* descriptor);
 int SemDescriptorPtr_free(SemDescriptorPtr* d);
 void SemDescriptorPtrList_print(ListHead* l);
+
+//we need to search the id in the list of the semdescriptors
+SemDescriptor* Search_id(ListHead* descriptor_list, int id);

@@ -22,6 +22,3 @@ typedef ListHead SemaphoreList;
 Semaphore* SemaphoreList_byId(SemaphoreList* l, int id);
 
 void SemaphoreList_print(ListHead* l);
-
-//we need to search the id in the list of the semdescriptors
-Semaphore* Search_id(ListHead* descriptor_list, int id);

@@ -21,42 +21,49 @@ void internal_semOpen(){
 
   Semaphore* sem=SemaphoreList_byId(&semaphores_used,semnum);
 
+  int fd = running->last_sem_fd;
+
   if(!sem){
     //if it doesn't exist in the system we have to create it
     sem = Semaphore_alloc(semnum, value);
+
+    if(!sem){
+      running->syscall_retvalue = DSOS_ECREATESEMAPHORE; //the semaphore couldn't be create
+      return;
+    }
     //now we have to add th esemaphore to the semaphore list of the system
     List_insert(&semaphores_list, semaphores_list.last, (ListItem*) sem);
-    int fd = running->last_sem_fd + 1;
-    //we have to create the semdescriptor
-    SemDescriptor* sem_desc = SemDescriptor_alloc(fd, sem, running);
-
-    //we have to add the descriptor to the list in the PCB
-    List_insert(&running->sem_descriptors, running->sem_descriptors.last, (ListItem*)sem_desc);
 
     //we have to insert the process in the list
     List_insert(&sem->descriptors, sem->descriptors.last, (ListItem*)running);
-
-    running->syscall_retvalue = semnum;
-
+  }
+  //we have to check that the semaphore isn't already open in the process
+  ListHead semaphores_opened = running->sem_descriptors;
+  SemDescriptor* opened = Search_id(&semaphores_opened, semnum);
+  if(opened){
+    running->syscall_retvalue = opened->fd;
   }
   else{
-    //if it exist in the system
-    //we have to check that the semaphore isn't already open in the process
-    ListHead semaphores_opened = running->sem_descriptors;
-    Semaphore* opened = Search_id(&semaphores_opened, semnum);
-    if(opened){
-      running->syscall_retvalue = semnum;
-    }
-    else{
-      int fd = running->last_sem_fd + 1;
-      //we have to create the semdescriptor
-      SemDescriptor_init();
-      SemDescriptor* sem_desc = SemDescriptor_alloc(fd, sem, running);
-      //we have to add the descriptor to the list in the PCB
-      List_insert(&running->sem_descriptors, running->sem_descriptors.last, (ListItem*)sem_desc);
-
-      running->syscall_retvalue = semnum;
+    (running->last_sem_fd)++;
+    //we have to create the semdescriptor
+    SemDescriptor* sem_desc = SemDescriptor_alloc(fd, sem, running);
+    if(!sem_desc){
+      running->syscall_retvalue = DSOS_ECREATESEMDESC; //the semDESCRIPTOR couldn't be create
+      return;
     }
 
-  }
+    SemDescriptorPtr * sem_desc_ptr = SemDescriptorPtr_alloc(sem_desc);
+    if(!sem_desc_ptr) {
+      running->syscall_retvalue = DSOS_ECREATESEMDESCPTR; //the semDESCRIPTORpointer couldn't be create
+      return;
+    }
+    sem_desc->ptr = sem_desc_ptr;
+
+    //we add teh descriptor pointer to the list
+    List_insert(&running-> sem_descriptors,running->sem_descriptors.last,(ListItem*) sem_desc);
+    List_insert(&running-> descriptors,running->descriptors.last,(ListItem*) sem_desc_ptr);
+    running->syscall_retvalue = fd;
+    }
+
+
 }
