@@ -25,7 +25,7 @@ void internal_semClose(){
   Semaphore* s=sem_d->semaphore;
 
   // tolgo me stesso dai descriptors del semaforo
-  List_detach(&(s->descriptors),(ListItem*)running);
+  List_detach(&(s->descriptors),(ListItem*)sem_d->ptr);
 
   if (!(s->descriptors).size) {
      s = (Semaphore*) List_detach(&semaphores_list, (ListItem*) s);

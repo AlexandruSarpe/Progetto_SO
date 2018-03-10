@@ -31,7 +31,7 @@ void internal_semPost(){
         return;
     }
 
-    if (s->count<0) {
+    if (s->count>0) {
         // rimuovo il primo processo in cima alla waiting queue del semaforo
         SemDescriptorPtr* toReady_proc_waiter=(SemDescriptorPtr*)List_detach(&(s->waiting_descriptors),(ListItem*)s->waiting_descriptors.first);
 

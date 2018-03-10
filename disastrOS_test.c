@@ -5,13 +5,6 @@
 #include "disastrOS.h"
 #include "disastrOS_globals.h"
 
-#define SEM_FILL 0
-#define SEM_EMPTY 1
-#define SEM_MUTEX1 2
-#define SEM_MUTEX2 3
-#define BUFFER_LENGTH 5
-#define ITERATIONS 10
-#define HOWMANY 10
 
 #define ERROR_HELPER(cond, msg) do {    \
         if (cond && (running->pid!=0)) {              \
@@ -24,13 +17,7 @@
         }   \
     } while(0)  \
 
-
-void initFunction_semaphores(void* args);
-void PrintBuffer(int * buffer);
-void Prod(void* args);
-void Cons(void* args);
 // we need this to handle the sleep state
-
 void sleeperFunction(void* args){
   printf("Hello, I am the sleeper, and I sleep %d\n",disastrOS_getpid());
   while(1) {
@@ -39,146 +26,53 @@ void sleeperFunction(void* args){
   }
 }
 
-void PrintBuffer(int * buffer){
-    int i;
-    printf("buffer : [ %d",buffer[0]);
-    for(i = 1; i < BUFFER_LENGTH;i++){
-        printf(" | %d",buffer[i]);}
-    printf(" ]\n");
+void childFunction(void* args){
+  printf("Hello, I am the child function %d\n",disastrOS_getpid());
+  int sem= DisastrOS_semOpen(1, 1);
+  ERROR_HELPER(sem < 0,"Error semOpen sem_fill process ");
+  disastrOS_printStatus();
+  int ret = DisastrOS_semWait(sem);
+  ERROR_HELPER(ret != 0, "Error semWait sem process ");
+  printf("I'm in cs pid=%d",running->pid);
+  ret = DisastrOS_semPost(sem);
+  ERROR_HELPER(ret != 0, "Error semPost sem process ");
+  ret = DisastrOS_semClose(sem);
+  ERROR_HELPER(ret != 0, "Error semClose sem process ");
+  disastrOS_exit(disastrOS_getpid()+1);
 }
 
-void Prod(void* args){
-    int i,ret;
 
-    printf("Starting producer with pid : %d\n",running->pid);
-    //opening the semaphores
-    int sem_fill= DisastrOS_semOpen(SEM_FILL, 0);
-    ERROR_HELPER(sem_fill < 0,"Error semOpen sem_fill process ");
-    //disastrOS_printStatus();
-    int sem_empty = DisastrOS_semOpen(SEM_EMPTY, BUFFER_LENGTH);
-    ERROR_HELPER(sem_empty < 0,"Error semOpen sem_empty process ");
-    //disastrOS_printStatus();
-    int sem_mutex1 = DisastrOS_semOpen(SEM_MUTEX1, 1);
-    ERROR_HELPER(sem_mutex1 < 0,"Error semOpen sem_mutex1 process ");
-    //disastrOS_printStatus();
-
-    for(i = 0;i < ITERATIONS;i++){
-        ret = DisastrOS_semWait(sem_empty);
-        ERROR_HELPER(ret != 0, "Error semWait sem_empty process ");
-        ret = DisastrOS_semWait(sem_mutex1);
-        ERROR_HELPER(ret != 0, "Error semWait sem_mutex1 process ");
-
-        printf("Hello, i am prod and i am in CS! Pid : %d\n",running->pid);
-        disastrOS_printStatus();
-
-        ret = DisastrOS_semPost(sem_mutex1);
-        ERROR_HELPER(ret != 0, "Error semPost sem_mutex1 process ");
-
-        ret = DisastrOS_semPost(sem_fill);
-        ERROR_HELPER(ret != 0, "Error semPost sem_fill process ");
-
-    }
-
-
-    ret = DisastrOS_semClose(sem_fill);
-    ERROR_HELPER(ret != 0, "Error semClose sem_fill process");
-
-    ret = DisastrOS_semClose(sem_empty);
-    ERROR_HELPER(ret != 0, "Error semClose sem_empty process");
-
-    ret = DisastrOS_semClose(sem_mutex1);
-    ERROR_HELPER(ret != 0, "Error semClose sem_mutex1 process");
-
-
-    disastrOS_exit(disastrOS_getpid()+1);
-}
-
-void Cons(void* args){
-    int i,ret;
-
-    printf("Starting consumer with pid : %d\n",running->pid);
-
-    //opening the semaphores
-    int sem_fill= DisastrOS_semOpen(SEM_FILL, 0);
-    ERROR_HELPER(sem_fill < 0,"Error semOpen sem_fill process ");
-
-    int sem_empty = DisastrOS_semOpen(SEM_EMPTY, BUFFER_LENGTH);
-    ERROR_HELPER(sem_empty < 0,"Error semOpen sem_empty process ");
-
-    int sem_mutex2 = DisastrOS_semOpen(SEM_MUTEX2, 1);
-    ERROR_HELPER( sem_mutex2 < 0,"Error semOpen sem_mutex2 process ");
-
-
-    for(i = 0;i < ITERATIONS;i++){
-
-        ret = DisastrOS_semWait(sem_fill);
-        ERROR_HELPER(ret != 0, "Error semWait sem_fill process");
-
-        ret = DisastrOS_semWait(sem_mutex2);
-        ERROR_HELPER(ret != 0, "Error semWait sem_mutex2 process ");
-
-        printf("Hello,i am the cons and i am in CS! Pid : %d\n",running->pid);
-        disastrOS_printStatus();
-        ret = DisastrOS_semPost(sem_mutex2);
-        ERROR_HELPER(ret != 0, "Error semPost sem_mutex2 process ");
-
-        ret = DisastrOS_semPost(sem_empty);
-        ERROR_HELPER(ret != 0, "Error semPost sem_empty process ");
-
-    }
-
-    ret = DisastrOS_semClose(sem_fill);
-    ERROR_HELPER(ret != 0, "Error semClose fd_fill process ");
-    ret = DisastrOS_semClose(sem_empty);
-    ERROR_HELPER(ret != 0, "Error semClose fd_empty process ");
-    ret = DisastrOS_semClose(sem_mutex2);
-    ERROR_HELPER(ret != 0, "Error semClose fd_me2 process ");
-
-    disastrOS_exit(disastrOS_getpid()+1);
-}
-void initFunction_semaphores(void* args) {
+void initFunction(void* args) {
   disastrOS_printStatus();
   printf("hello, I am init and I just started\n");
   disastrOS_spawn(sleeperFunction, 0);
 
 
-  printf("I feel like to spawn 10 nice processes\n");
-  int children=0;
-  int i;
-  for (i=0; i<5; ++i) {
+  printf("I feel like to spawn 10 nice threads\n");
+  int alive_children=0;
+  for (int i=0; i<10; ++i) {
     int type=0;
     int mode=DSOS_CREATE;
     printf("mode: %d\n", mode);
-    printf("opening resource\n");
+    printf("opening resource (and creating if necessary)\n");
     int fd=disastrOS_openResource(i,type,mode);
     printf("fd=%d\n", fd);
-    disastrOS_spawn(Prod, 0);
-    children++;
+    disastrOS_spawn(childFunction, 0);
+    alive_children++;
   }
-  for (; i<10; ++i) {
-    int type=0;
-    int mode=DSOS_CREATE;
-    printf("mode: %d\n", mode);
-    printf("opening resource\n");
-    int fd=disastrOS_openResource(i,type,mode);
-    printf("fd=%d\n", fd);
-    disastrOS_spawn(Cons, 0);
-    children++;
-  }
+
   disastrOS_printStatus();
   int retval;
   int pid;
-  while(children>0 && (pid=disastrOS_wait(0, &retval))>=0){
+  while(alive_children>0 && (pid=disastrOS_wait(0, &retval))>=0){
     disastrOS_printStatus();
     printf("initFunction, child: %d terminated, retval:%d, alive: %d \n",
-     pid, retval, children);
-    --children;
+	   pid, retval, alive_children);
+    --alive_children;
   }
   printf("shutdown!");
   disastrOS_shutdown();
 }
-
-
 
 int main(int argc, char** argv){
   char* logfilename=0;
@@ -188,9 +82,9 @@ int main(int argc, char** argv){
   // we create the init process processes
   // the first is in the running variable
   // the others are in the ready queue
+  printf("the function pointer is: %p", childFunction);
   // spawn an init process
-
   printf("start\n");
-  disastrOS_start(initFunction_semaphores, 0, logfilename);
+  disastrOS_start(initFunction, 0, logfilename);
   return 0;
 }

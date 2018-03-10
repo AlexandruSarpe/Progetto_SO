@@ -24,7 +24,7 @@ void internal_semWait(){
 
   else if(sem->count<=0){
     //the process has to wait in the waiting queue
-
+    (sem->count)--;
     List_insert(&sem->waiting_descriptors, sem->waiting_descriptors.last, (ListItem*)sd->ptr_waiter);
     //we have to change the state of the process_semaphores
     running->status = Waiting;
@@ -34,7 +34,7 @@ void internal_semWait(){
     if (ready_list.first) {
       running=(PCB*) List_detach(&ready_list, ready_list.first);
       running->syscall_retvalue = 0;
-  } else {
+    } else {
       running=0;
       printf ("they are all sleeping\n");
       running->syscall_retvalue = 0;
