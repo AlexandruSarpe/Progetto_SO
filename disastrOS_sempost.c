@@ -42,7 +42,7 @@ void internal_semPost(){
         List_detach(&waiting_list,(ListItem*)toReady_proc_waiter_pcb);
 
         // metto lo status del processo rimosso dalla waiting list a Ready
-        toReady_proc_pcb->status=Ready;
+        toReady_proc_waiter_pcb->status=Ready;
 
         // inserisco il processo nella ready list del sistema
         List_insert(&ready_list,ready_list.last,(ListItem*)toReady_proc_waiter_pcb);
