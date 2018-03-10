@@ -20,28 +20,29 @@ void internal_semOpen(){
   ListHead semaphores_used = semaphores_list;
 
   Semaphore* sem=SemaphoreList_byId(&semaphores_used,semnum);
-
   int fd = running->last_sem_fd;
 
   if(!sem){
     //if it doesn't exist in the system we have to create it
     sem = Semaphore_alloc(semnum, value);
+    printf("lo alloco con sem_num=%d\n",semnum);
 
     if(!sem){
       running->syscall_retvalue = DSOS_ECREATESEMAPHORE; //the semaphore couldn't be create
       return;
     }
-    //now we have to add th esemaphore to the semaphore list of the system
+    //now we have to add the semaphore to the semaphore list of the system
     List_insert(&semaphores_list, semaphores_list.last, (ListItem*) sem);
 
-    //we have to insert the process in the list
-    List_insert(&sem->descriptors, sem->descriptors.last, (ListItem*)running);
   }
+
   //we have to check that the semaphore isn't already open in the process
   ListHead semaphores_opened = running->sem_descriptors;
+
   SemDescriptor* opened = Search_id(&semaphores_opened, semnum);
   if(opened){
     running->syscall_retvalue = opened->fd;
+    return;
   }
   else{
     (running->last_sem_fd)++;
@@ -68,7 +69,7 @@ void internal_semOpen(){
 
     //we add teh descriptor pointer to the list
     List_insert(&running-> sem_descriptors,running->sem_descriptors.last,(ListItem*) sem_desc);
-    List_insert(&running-> descriptors,running->descriptors.last,(ListItem*) sem_desc_ptr);
+    List_insert(&sem->descriptors, sem->descriptors.last, (ListItem*)sem_desc_ptr);
     running->syscall_retvalue = fd;
     }
 

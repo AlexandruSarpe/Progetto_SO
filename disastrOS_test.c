@@ -54,13 +54,13 @@ void Prod(void* args){
     //opening the semaphores
     int sem_fill= DisastrOS_semOpen(SEM_FILL, 0);
     ERROR_HELPER(sem_fill < 0,"Error semOpen sem_fill process ");
-
+    //disastrOS_printStatus();
     int sem_empty = DisastrOS_semOpen(SEM_EMPTY, BUFFER_LENGTH);
     ERROR_HELPER(sem_empty < 0,"Error semOpen sem_empty process ");
-
+    //disastrOS_printStatus();
     int sem_mutex1 = DisastrOS_semOpen(SEM_MUTEX1, 1);
     ERROR_HELPER(sem_mutex1 < 0,"Error semOpen sem_mutex1 process ");
-
+    //disastrOS_printStatus();
 
     for(i = 0;i < ITERATIONS;i++){
         ret = DisastrOS_semWait(sem_empty);
@@ -69,7 +69,7 @@ void Prod(void* args){
         ERROR_HELPER(ret != 0, "Error semWait sem_mutex1 process ");
 
         printf("Hello, i am prod and i am in CS! Pid : %d\n",running->pid);
-
+        disastrOS_printStatus();
 
         ret = DisastrOS_semPost(sem_mutex1);
         ERROR_HELPER(ret != 0, "Error semPost sem_mutex1 process ");
@@ -118,7 +118,7 @@ void Cons(void* args){
         ERROR_HELPER(ret != 0, "Error semWait sem_mutex2 process ");
 
         printf("Hello,i am the cons and i am in CS! Pid : %d\n",running->pid);
-
+        disastrOS_printStatus();
         ret = DisastrOS_semPost(sem_mutex2);
         ERROR_HELPER(ret != 0, "Error semPost sem_mutex2 process ");
 
