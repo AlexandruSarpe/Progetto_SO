@@ -134,7 +134,7 @@ void Cons(void* args){
 
 
 void initFunction_semaphores(void* args) {
-
+  disastrOS_printStatus();
   printf("hello, I am init and I just started pid=%d\n",running->pid);
   disastrOS_spawn(sleeperFunction, 0);
 
@@ -142,23 +142,25 @@ void initFunction_semaphores(void* args) {
   printf("I feel like to spawn 10 nice processes\n");
   int children=0;
   int i;
+  int fd[10];
   for (i=0; i<5; ++i) {
     int type=0;
     int mode=DSOS_CREATE;
     printf("mode: %d\n", mode);
     printf("opening resource\n");
-    int fd=disastrOS_openResource(i,type,mode);
-    printf("fd=%d\n", fd);
+    fd[i]=disastrOS_openResource(i,type,mode);
+    printf("fd=%d\n", fd[i]);
     disastrOS_spawn(Prod, 0);
     children++;
   }
+
   for (; i<10; ++i) {
     int type=0;
     int mode=DSOS_CREATE;
     printf("mode: %d\n", mode);
     printf("opening resource\n");
-    int fd=disastrOS_openResource(i,type,mode);
-    printf("fd=%d\n", fd);
+    fd[i]=disastrOS_openResource(i,type,mode);
+    printf("fd=%d\n", fd[i]);
     disastrOS_spawn(Cons, 0);
     children++;
   }
@@ -170,9 +172,15 @@ void initFunction_semaphores(void* args) {
      pid, retval, children);
     --children;
   }
+  for (i=0; i<10; ++i) {
+    printf("closing resource %d\n",fd[i]);
+    disastrOS_closeResource(fd[i]);
+    disastrOS_destroyResource(i);
+  }
+
   disastrOS_printStatus();
 
-  printf("shutdown!");
+  printf("shutdown!\n");
   disastrOS_shutdown();
 }
 
