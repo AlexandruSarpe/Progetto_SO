@@ -11,8 +11,8 @@
 #define SEM_MUTEX1 2
 #define SEM_MUTEX2 3
 #define BUFFER_LENGTH_SEM 5
-#define ITERATIONS 10
-#define HOWMANY 10
+#define ROUNDS 10
+
 
 #define ERROR_HELPER(cond, msg) do {    \
         if (cond && (running->pid!=0)) {              \
@@ -25,6 +25,8 @@
         }   \
     } while(0)  \
 
+int read_index,deposit,write_index;
+int transactions[BUFFER_LENGTH_SEM];
 
 void initFunction_semaphores(void* args);
 void PrintBuffer(int * buffer);
@@ -56,14 +58,15 @@ void Prod(void* args){
     ERROR_HELPER(sem_mutex1 < 0,"Error semOpen sem_mutex1 process ");
 
 
-    for(i = 0;i < ITERATIONS;i++){
+    for(i = 0;i < ROUNDS;i++){
         ret = DisastrOS_semWait(sem_empty);
         ERROR_HELPER(ret != 0, "Error semWait sem_empty process ");
         ret = DisastrOS_semWait(sem_mutex1);
         ERROR_HELPER(ret != 0, "Error semWait sem_mutex1 process ");
 
         printf("Hello, i am prod and i am in CS! Pid : %d\n",running->pid);
-
+        transactions[write_index] = running->pid;
+        write_index = (write_index + 1) % BUFFER_LENGTH_SEM;
 
         ret = DisastrOS_semPost(sem_mutex1);
         ERROR_HELPER(ret != 0, "Error semPost sem_mutex1 process ");
@@ -103,7 +106,7 @@ void Cons(void* args){
     ERROR_HELPER( sem_mutex2 < 0,"Error semOpen sem_mutex2 process ");
 
 
-    for(i = 0;i < ITERATIONS;i++){
+    for(i = 0;i < ROUNDS;i++){
 
         ret = DisastrOS_semWait(sem_fill);
         ERROR_HELPER(ret != 0, "Error semWait sem_fill process");
@@ -112,6 +115,12 @@ void Cons(void* args){
         ERROR_HELPER(ret != 0, "Error semWait sem_mutex2 process ");
 
         printf("Hello,i am the cons and i am in CS! Pid : %d\n",running->pid);
+        int lastTransaction = transactions[read_index];
+        read_index = (read_index + 1) % BUFFER_LENGTH_SEM;
+        deposit += lastTransaction;
+        if (read_index % 10 == 0) {
+            printf("After the last 10 transactions balance is now %d.\n", deposit);
+        }
 
         ret = DisastrOS_semPost(sem_mutex2);
         ERROR_HELPER(ret != 0, "Error semPost sem_mutex2 process ");
@@ -138,7 +147,9 @@ void initFunction_semaphores(void* args) {
   printf("hello, I am init and I just started pid=%d\n",running->pid);
   disastrOS_spawn(sleeperFunction, 0);
 
-
+  //inizializzo write index e read read_index
+  write_index=0;
+  read_index=0;
   printf("I feel like to spawn 10 nice processes\n");
   int children=0;
   int i;
