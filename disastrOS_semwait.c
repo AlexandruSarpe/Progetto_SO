@@ -15,7 +15,10 @@ void internal_semWait(){
 
   //we have to check if the semaphore is opened in the process
   SemDescriptor* sd = SemDescriptorList_byFd(&process_semaphores, fd);
-
+  if(!sd){
+    running->syscall_retvalue=DSOS_ESEMNOTOWNED;
+    return;
+  }
   Semaphore* sem=sd->semaphore;
 
   if(!sem){
