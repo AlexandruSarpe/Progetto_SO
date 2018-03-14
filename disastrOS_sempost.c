@@ -52,6 +52,6 @@ void internal_semPost(){
     (s->count)++;
 
     //setto il valore di ritorno a 0 per indicare successo
-    running->syscall_retvalue = 0;
+    running->syscall_retvalue = SUCCESS;
 
 }
