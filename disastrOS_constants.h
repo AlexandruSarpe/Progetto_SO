@@ -67,3 +67,6 @@
 // scheduling
 #define ALPHA 0.5f
 #define INTERVAL 100 // milliseconds for timer tick
+
+//success
+#define SUCCESS 0
