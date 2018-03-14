@@ -57,6 +57,6 @@ void internal_semClose(){
     running->syscall_retvalue= DSOS_ESEMDESCPTRFREE;
     return;
    }
-   running->syscall_retvalue=ret;
+   if (ret==0x0) running->syscall_retvalue=SUCCESS;
    return;
 }
